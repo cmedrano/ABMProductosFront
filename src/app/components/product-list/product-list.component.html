@@ -1,0 +1,266 @@
+<div class="container mt-4">
+  <h2>Listado de Productos</h2>
+
+  <div class="container mt-3">
+    <div class="row align-items-end">
+      <div class="col-12 col-md-6 mb-3">
+        <label class="form-label fw-semibold">Buscar</label>
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Producto..."
+          [(ngModel)]="searchTerm"
+        />
+      </div>
+
+      <div class="col-12 col-md-4 mb-3">
+        <label class="form-label fw-semibold">Categorías</label>
+        <select class="form-select" [(ngModel)]="selectedCategory">
+          <option value="">Todas las categorías</option>
+          <option *ngFor="let cat of categories" [value]="cat">
+            {{ cat }}
+          </option>
+        </select>
+      </div>
+
+      <div
+        class="col-12 col-md-2 mb-3 d-flex align-items-end justify-content-md-end"
+      >
+        <button class="btn btn-primary w-100 w-md-auto" (click)="openAddModal()">
+          + Agregar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <table class="table table-bordered table-striped">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Descripción</th>
+        <th>Categoría</th>
+        <th>Imagen</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let p of filteredProducts()">
+        <td>{{ p.name }}</td>
+        <td>{{ p.description }}</td>
+        <td>{{ p.category }}</td>
+        <td><img [src]="p.image" width="80" /></td>
+        <td style="margin: 10px">
+          <button
+            class="btn btn-warning btn-sm me-2"
+            (click)="openEditModal(p.id)"
+          >
+            <i class="bi bi-pencil-square"></i>
+          </button>
+          <button
+            class="btn btn-danger btn-sm ms-2"
+            (click)="openDeleteModal(p.id)"
+          >
+            <i class="bi bi-trash"></i>
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Modal eliminar -->
+<div
+  class="modal fade"
+  id="confirmDeleteModal"
+  tabindex="-1"
+  aria-labelledby="confirmDeleteLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="confirmDeleteLabel">
+          Confirmar eliminación
+        </h5>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+          aria-label="Cerrar"
+        ></button>
+      </div>
+      <div class="modal-body">
+        ¿Seguro que deseas eliminar este producto? Esta acción no se puede
+        deshacer.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Cancelar
+        </button>
+        <button type="button" class="btn btn-danger" (click)="confirmDelete()">
+          Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Agregar -->
+<div class="modal fade" id="addProductModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">Agregar nuevo producto</h5>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+
+      <div class="modal-body">
+        <form #addForm="ngForm">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Nombre</label>
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="product.name"
+              name="name"
+              required
+            />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Descripción</label>
+            <textarea
+              class="form-control"
+              [(ngModel)]="product.description"
+              name="description"
+              rows="3"
+            ></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Categoría</label>
+            <select
+              class="form-select"
+              [(ngModel)]="product.category"
+              name="category"
+            >
+              <option *ngFor="let cat of categories" [value]="cat">
+                {{ cat }}
+              </option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Imagen (URL)</label>
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="product.image"
+              name="image"
+              placeholder="https://..."
+            />
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          data-bs-dismiss="modal"
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="btn btn-success"
+          (click)="saveNewProduct()"
+        >
+          Guardar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Editar  -->
+<div class="modal fade" id="editProductModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-warning text-dark">
+        <h5 class="modal-title">Editar producto</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+
+      <div class="modal-body">
+        <form #editForm="ngForm">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Nombre</label>
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="selectedProduct.name"
+              name="editName"
+              required
+            />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Descripción</label>
+            <textarea
+              class="form-control"
+              [(ngModel)]="selectedProduct.description"
+              name="editDescription"
+              rows="3"
+            ></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Categoría</label>
+            <select
+              class="form-select"
+              [(ngModel)]="selectedProduct.category"
+              name="editCategory"
+            >
+              <option *ngFor="let cat of categories" [value]="cat">
+                {{ cat }}
+              </option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Imagen (URL)</label>
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="selectedProduct.image"
+              name="editImage"
+              placeholder="https://..."
+            />
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Cancelar
+        </button>
+        <button type="button" class="btn btn-success" (click)="updateProduct()">
+          Guardar cambios
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
