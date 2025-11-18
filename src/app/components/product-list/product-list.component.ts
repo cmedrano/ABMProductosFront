@@ -1,8 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Product, ProductService } from '../../services/product.service';
+import { CategoryService } from '../../services/category.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
+import { Category } from '../../models/category.model';
 
 declare var bootstrap: any;
 
@@ -13,11 +16,13 @@ declare var bootstrap: any;
   styleUrls: ['./product-list.component.scss'],
   imports: [CommonModule, FormsModule],
 })
-export class ProductListComponent {
+export class ProductListComponent implements OnInit, OnDestroy {
+  private categoriesSub!: Subscription;
+
   products: Product[] = [];
   searchTerm: string = '';
   selectedCategory: string = '';
-  categories: string[] = [];
+  categories: Category[] = [];
   productToDelete: number | null = null;
   product: Product = {
     id: 0,
@@ -34,10 +39,14 @@ export class ProductListComponent {
     image: '',
   };
 
-  constructor(private productService: ProductService, private router: Router) {}
+  constructor(
+    private productService: ProductService,
+    private router: Router,
+    private categoryService: CategoryService
+  ) {}
 
   ngOnInit() {
-    this.products = this.productService.getAll();
+    this.loadProducts();
     this.loadCategories();
   }
 
@@ -56,9 +65,20 @@ export class ProductListComponent {
     this.products = this.productService.getAll();
   }
 
+  loadProducts() {
+    this.products = this.productService.getAll();
+  }
+
   loadCategories() {
-    const allCategories = this.products.map((p) => p.category);
-    this.categories = Array.from(new Set(allCategories));
+    this.categoriesSub = this.categoryService.getAll().subscribe({
+      next: (categorias) => {
+        const allCategories = categorias.map((p) => p.name);
+        this.categories = allCategories;
+      },
+      error: (e) => {
+        console.error('error:', e);
+      },
+    });
   }
 
   filteredProducts() {
@@ -66,9 +86,7 @@ export class ProductListComponent {
     return this.products.filter((p) => {
       const matchesSearch =
         !term ||
-        p.name.toLowerCase().includes(term) ||
-        p.description.toLowerCase().includes(term) ||
-        p.category.toLowerCase().includes(term);
+        p.name.toLowerCase().includes(term) 
 
       const matchesCategory =
         !this.selectedCategory || p.category === this.selectedCategory;
@@ -141,5 +159,8 @@ export class ProductListComponent {
     const modalElement = document.getElementById('editProductModal');
     const modal = bootstrap.Modal.getInstance(modalElement!);
     modal.hide();
+  }
+  ngOnDestroy(): void {
+    this.categoriesSub.unsubscribe();
   }
 }
