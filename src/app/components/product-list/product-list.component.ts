@@ -35,22 +35,15 @@ export class ProductListComponent {
     categories: [],
     imageUrl: '',
   };
-  newProduct: CreateProduct = {
-    name: '',
-    description: '',
-    imageUrl: '',
-    categories: [],
-  };
 
   constructor(private productService: ProductService) {}
 
   ngOnInit() {
-    // this.products = this.productService.getAllProducts();
     this.loadProducts();
-    console.log(this.products);
     this.loadCategories();
   }
 
+  // Cargar categorías
   loadCategories() {
     this.productService.getAllCategories().subscribe({
       next: (categories) => 
@@ -59,6 +52,7 @@ export class ProductListComponent {
     });
   }
 
+  // Cargar productos
   loadProducts() {
     this.productService.getAllProducts().subscribe({
       next: (result) => 
@@ -67,21 +61,7 @@ export class ProductListComponent {
     });
   }
 
-  // addProduct(product: Product) {
-  //   this.productService.addProducts(product);
-  //   this.products = this.productService.getAllProducts();
-  // }
-
-  // editProduct(id: number, selectedProduct: Product) {
-  //   this.productService.updateProducts(id, selectedProduct);
-  //   this.products = this.productService.getAllProducts();
-  // }
-
-  // deleteProduct(id: number) {
-  //   this.productService.deleteProducts(id);
-  //   this.products = this.productService.getAllProducts();
-  // }
-
+  // Eliminar producto
   deleteProduct(id: number) {
     this.productService.deleteProduct(id).subscribe({
       next: () => {
@@ -99,10 +79,7 @@ export class ProductListComponent {
   addCategory(categoryId: number) {
     if (!categoryId) return;
     
-    // Buscar la categoría completa por ID
     const category = this.availableCategories.find(cat => cat.id === categoryId);
-    
-    // Verificar si ya existe
     const alreadyExists = this.product.categories.some(cat => cat.id === categoryId);
     
     if (category && !alreadyExists) {
@@ -116,20 +93,13 @@ export class ProductListComponent {
     this.product.categories.splice(index, 1);
   }
 
-  // Agregar categoría al producto
-  // addCategory(categoryId: number): void {
-  //   const category = this.categorys.find(cat => cat.id === categoryId);
-  //   if (category && !this.product.category.some(cat => cat.id === categoryId)) {
-  //     this.product.category.push(category);
-  //   }
-  // }
-
   // Obtener categorías disponibles
   get availableCategories(): Category[] {
     const selectedIds = this.product.categories.map(cat => cat.id);
     return this.categorys.filter(cat => !selectedIds.includes(cat.id));
   }
 
+  // Filtrar productos
   filteredProducts() {
     const term = this.searchTerm.toLowerCase().trim();
     return this.products.filter((p) => {
@@ -168,10 +138,13 @@ export class ProductListComponent {
   }
 
   // Métodos para el modal de Agregar
+
   openAddModal() {
     this.selectedFile = null;
     this.uploadError = '';
+
     this.clearFileInput();
+
     const modalElement = document.getElementById('addProductModal');
     const modal = new bootstrap.Modal(modalElement!);
     modal.show();
@@ -188,76 +161,57 @@ export class ProductListComponent {
   }
 
   saveNewProduct() {
-    this.productService.createProduct(this.newProduct).subscribe({
+    const newProduct : CreateProduct = {
+    name: this.product.name,
+    description: this.product.description,
+    imageUrl: this.product.imageUrl,  
+    categories: this.product.categories.map(cat => cat.id)
+    };
+
+    this.productService.createProduct(newProduct).subscribe({
       next: (product) => {
         console.log('Product created:', product);
         this.loadProducts(); // Recargar lista
       },
       error: (error) => console.error('Error creating product:', error)
     });
-    // if (this.product.name.trim() === '') return;
-    // this.addProduct(this.product);
 
-    // Limpiar formulario
-    this.newProduct = {
-      name: '',
-      description: '',
-      categories: [],
-      imageUrl: '',
-    };
-
-    // Cerrar modal
     const modalElement = document.getElementById('addProductModal');
     const modal = bootstrap.Modal.getInstance(modalElement!);
     modal.hide();
   }
 
   // Métodos para el modal de Edición
-  // openEditModal(id: number) {
-  //   this.clearFileInput();
-  //   const product = this.products.find((p) => p.id === id);
-  //   if (!product) return;
-
-  // this.selectedProduct = { ...product};
-  //   const modalElement = document.getElementById('editProductModal');
-  //   const modal = new bootstrap.Modal(modalElement!);
-  //   modal.show();
-  // }
 
   openEditModal(product: Product) {
+    this.clearFileInput();
     // Copiar el producto para editar (no la referencia directa)
     this.selectedProduct = {
       ...product,
       categories: [...product.categories] // Copiar el array de categorías
     };
+    
+    const modalElement = document.getElementById('editProductModal');
+    const modal = new bootstrap.Modal(modalElement!);
+    modal.show();
   }
 
   updateProduct() {
-    
-    // Si hay nueva imagen, procesarla
-    // En una app real, aquí subirías la imagen al servidor
-    const imageName = `product-${Date.now()}.jpg`;
-    this.selectedProduct.imageUrl = `assets/image/${imageName}`;
-    
     const updateData: UpdateProduct = {
       id: this.selectedProduct.id,
       name: this.selectedProduct.name,
       description: this.selectedProduct.description,
       imageUrl: this.selectedProduct.imageUrl, 
-      //category: this.selectedProduct.category,
       categories: this.selectedProduct.categories.map(cat => cat.id)
     };
+
     this.productService.updateProduct(updateData).subscribe({
       next: (product) => {
         console.log('Product updated:', product);
-        this.loadProducts(); // Recargar lista
+        this.loadProducts();
       },
       error: (error) => console.error('Error updating product:', error)
     });
-
-
-    // if (!this.selectedProduct) return;
-    // this.editProduct(this.selectedProduct.id, this.selectedProduct);
 
     // Limpiar formulario
     this.selectedProduct = {
@@ -330,7 +284,7 @@ export class ProductListComponent {
   }
 
   // Metodos para la carga archivos de imagen
-
+  
   // Cuando se selecciona un archivo
   onFileSelected(event: any): void {
     const file: File = event.target.files[0];
@@ -398,6 +352,4 @@ export class ProductListComponent {
     }
   }
   
-
-
 }
