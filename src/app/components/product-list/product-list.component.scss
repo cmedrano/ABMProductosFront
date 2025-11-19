@@ -2,3 +2,34 @@
     width: 100%;        
     max-width: 400px;  
   }
+
+  /* Estilos para mejorar la apariencia */
+.selected-categories .badge {
+  font-size: 0.875rem;
+  padding: 0.375rem 0.75rem;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.cursor-pointer:hover {
+  background-color: #e9ecef !important;
+}
+
+.badge {
+  font-size: 0.75rem;
+}
+
+.object-fit-cover {
+  object-fit: cover;
+}
+
+.custom-preview-image {
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
