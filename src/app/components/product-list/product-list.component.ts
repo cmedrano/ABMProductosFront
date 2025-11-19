@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
-import { Category, Product, ProductService } from '../../services/product.service';
+import { Category, CreateProduct, Product, ProductService, UpdateProduct } from '../../services/product.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -26,60 +25,108 @@ export class ProductListComponent {
     id: 0,
     name: '',
     description: '',
-    category: [],
-    image: '',
+    categories: [],
+    imageUrl: '',
   };
   selectedProduct: Product = {
     id: 0,
     name: '',
     description: '',
-    category: [],
-    image: '',
+    categories: [],
+    imageUrl: '',
+  };
+  newProduct: CreateProduct = {
+    name: '',
+    description: '',
+    imageUrl: '',
+    categories: [],
   };
 
-  constructor(private productService: ProductService, private router: Router) {}
+  constructor(private productService: ProductService) {}
 
   ngOnInit() {
-    this.products = this.productService.getAllProducts();
+    // this.products = this.productService.getAllProducts();
+    this.loadProducts();
+    console.log(this.products);
     this.loadCategories();
   }
 
-  addProduct(product: Product) {
-    this.productService.addProducts(product);
-    this.products = this.productService.getAllProducts();
+  loadCategories() {
+    this.productService.getAllCategories().subscribe({
+      next: (categories) => 
+        this.categorys = categories,
+      error: (error) => console.error('Error loading categories:', error)
+    });
   }
 
-  editProduct(id: number, selectedProduct: Product) {
-    this.productService.updateProducts(id, selectedProduct);
-    this.products = this.productService.getAllProducts();
+  loadProducts() {
+    this.productService.getAllProducts().subscribe({
+      next: (result) => 
+        this.products = result,
+      error: (error) => console.error('Error loading products:', error)
+    });
   }
+
+  // addProduct(product: Product) {
+  //   this.productService.addProducts(product);
+  //   this.products = this.productService.getAllProducts();
+  // }
+
+  // editProduct(id: number, selectedProduct: Product) {
+  //   this.productService.updateProducts(id, selectedProduct);
+  //   this.products = this.productService.getAllProducts();
+  // }
+
+  // deleteProduct(id: number) {
+  //   this.productService.deleteProducts(id);
+  //   this.products = this.productService.getAllProducts();
+  // }
 
   deleteProduct(id: number) {
-    this.productService.deleteProducts(id);
-    this.products = this.productService.getAllProducts();
-  }
-
-  loadCategories() {
-    const categoryObjects = this.productService.getAllCategorys();
-    this.categorys = categoryObjects;
-  }
-
-  // Eliminar categoría del producto
-  removeCategory(index: number): void {
-    this.product.category.splice(index, 1);
+    this.productService.deleteProduct(id).subscribe({
+      next: () => {
+        console.log('Producto eliminado');
+        this.loadProducts();
+      },
+      error: (error) => {
+        console.error('Error eliminando producto:', error);
+        alert('Error al eliminar el producto');
+      }
+    });
   }
 
   // Agregar categoría al producto
-  addCategory(categoryId: number): void {
-    const category = this.categorys.find(cat => cat.id === categoryId);
-    if (category && !this.product.category.some(cat => cat.id === categoryId)) {
-      this.product.category.push(category);
+  addCategory(categoryId: number) {
+    if (!categoryId) return;
+    
+    // Buscar la categoría completa por ID
+    const category = this.availableCategories.find(cat => cat.id === categoryId);
+    
+    // Verificar si ya existe
+    const alreadyExists = this.product.categories.some(cat => cat.id === categoryId);
+    
+    if (category && !alreadyExists) {
+      this.product.categories.push(category);
+      console.log('Categoría agregada:', category);
     }
   }
 
+  // Eliminar categoría del producto
+  removeCategory(index: number) {
+    this.product.categories.splice(index, 1);
+  }
+
+  // Agregar categoría al producto
+  // addCategory(categoryId: number): void {
+  //   const category = this.categorys.find(cat => cat.id === categoryId);
+  //   if (category && !this.product.category.some(cat => cat.id === categoryId)) {
+  //     this.product.category.push(category);
+  //   }
+  // }
+
   // Obtener categorías disponibles
   get availableCategories(): Category[] {
-    const selectedIds = this.product.category.map(cat => cat.id);
+    const selectedIds = this.product.categories.map(cat => cat.id);
     return this.categorys.filter(cat => !selectedIds.includes(cat.id));
   }
 
@@ -90,13 +137,13 @@ export class ProductListComponent {
         !term ||
         p.name.toLowerCase().includes(term) ||
         p.description.toLowerCase().includes(term) ||
-        p.category.some((cat) =>
-          cat.description.toLowerCase().includes(term)
+        p.categories.some((cat) =>
+          cat.name.toLowerCase().includes(term)
         );
 
       const matchesCategory =
         !this.selectedCategory || 
-        p.category.some(cat => cat.description === this.selectedCategory);
+        p.categories.some(cat => cat.name === this.selectedCategory);
       
       return matchesSearch && matchesCategory;
     });
@@ -130,63 +177,117 @@ export class ProductListComponent {
     modal.show();
   }
 
-  saveNewProduct() {
-    if (this.product.name.trim() === '') return;
-    this.addProduct(this.product);
-
+  closeModal() {
     this.product = {
       id: 0,
       name: '',
       description: '',
-      category: [],
-      image: '',
+      categories: [],
+      imageUrl: '',
+    };
+  }
+
+  saveNewProduct() {
+    this.productService.createProduct(this.newProduct).subscribe({
+      next: (product) => {
+        console.log('Product created:', product);
+        this.loadProducts(); // Recargar lista
+      },
+      error: (error) => console.error('Error creating product:', error)
+    });
+    // if (this.product.name.trim() === '') return;
+    // this.addProduct(this.product);
+
+    // Limpiar formulario
+    this.newProduct = {
+      name: '',
+      description: '',
+      categories: [],
+      imageUrl: '',
     };
 
+    // Cerrar modal
     const modalElement = document.getElementById('addProductModal');
     const modal = bootstrap.Modal.getInstance(modalElement!);
     modal.hide();
   }
 
   // Métodos para el modal de Edición
-  openEditModal(id: number) {
-    this.clearFileInput();
-    const product = this.products.find((p) => p.id === id);
-    if (!product) return;
+  // openEditModal(id: number) {
+  //   this.clearFileInput();
+  //   const product = this.products.find((p) => p.id === id);
+  //   if (!product) return;
 
-  this.selectedProduct = { ...product};
-    const modalElement = document.getElementById('editProductModal');
-    const modal = new bootstrap.Modal(modalElement!);
-    modal.show();
+  // this.selectedProduct = { ...product};
+  //   const modalElement = document.getElementById('editProductModal');
+  //   const modal = new bootstrap.Modal(modalElement!);
+  //   modal.show();
+  // }
+
+  openEditModal(product: Product) {
+    // Copiar el producto para editar (no la referencia directa)
+    this.selectedProduct = {
+      ...product,
+      categories: [...product.categories] // Copiar el array de categorías
+    };
   }
 
   updateProduct() {
-    if (!this.selectedProduct) return;
-    this.editProduct(this.selectedProduct.id, this.selectedProduct);
+    
+    // Si hay nueva imagen, procesarla
+    // En una app real, aquí subirías la imagen al servidor
+    const imageName = `product-${Date.now()}.jpg`;
+    this.selectedProduct.imageUrl = `assets/image/${imageName}`;
+    
+    const updateData: UpdateProduct = {
+      id: this.selectedProduct.id,
+      name: this.selectedProduct.name,
+      description: this.selectedProduct.description,
+      imageUrl: this.selectedProduct.imageUrl, 
+      //category: this.selectedProduct.category,
+      categories: this.selectedProduct.categories.map(cat => cat.id)
+    };
+    this.productService.updateProduct(updateData).subscribe({
+      next: (product) => {
+        console.log('Product updated:', product);
+        this.loadProducts(); // Recargar lista
+      },
+      error: (error) => console.error('Error updating product:', error)
+    });
+
+
+    // if (!this.selectedProduct) return;
+    // this.editProduct(this.selectedProduct.id, this.selectedProduct);
+
+    // Limpiar formulario
     this.selectedProduct = {
       id: 0,
       name: '',
       description: '',
-      category: [],
-      image: '',
+      categories: [],
+      imageUrl: '',
     };
+
     const modalElement = document.getElementById('editProductModal');
     const modal = bootstrap.Modal.getInstance(modalElement!);
     modal.hide();
   }
-
+  
   addCategoryToEdit(categoryId: number): void {
+    if (!categoryId) return;
+
     const category = this.categorys.find(cat => cat.id === categoryId);
-    if (category && !this.selectedProduct.category.some(cat => cat.id === categoryId)) {
-      this.selectedProduct.category.push(category);
+    if (category && !this.selectedProduct.categories.some(cat => cat.id === categoryId)) {
+      this.selectedProduct.categories.push(category);
     }
   }
 
   removeCategoryFromEdit(index: number): void {
-    this.selectedProduct.category.splice(index, 1);
+    this.selectedProduct.categories.splice(index, 1);
   }
 
   get availableCategoriesForEdit(): Category[] {
-    const selectedIds = this.selectedProduct.category.map(cat => cat.id);
+    const selectedIds = this.selectedProduct.categories.map(cat => cat.id);
     return this.categorys.filter(cat => !selectedIds.includes(cat.id));
   }
 
@@ -208,14 +309,14 @@ export class ProductListComponent {
       
       const reader = new FileReader();
       reader.onload = (e: any) => {
-        this.selectedProduct.image = e.target.result;
+        this.selectedProduct.imageUrl = e.target.result;
       };
       reader.readAsDataURL(file);
     }
   }
 
   removeEditImage(): void {
-    this.selectedProduct.image = '';
+    this.selectedProduct.imageUrl = '';
     this.uploadError = '';
     
     const fileInput = document.querySelector('#editProductModal input[type="file"]') as HTMLInputElement;
@@ -254,7 +355,7 @@ export class ProductListComponent {
       // Crear URL para vista previa
       const reader = new FileReader();
       reader.onload = (e: any) => {
-        this.product.image = e.target.result;
+        this.product.imageUrl = e.target.result;
       };
       reader.readAsDataURL(file);
     }
@@ -268,8 +369,8 @@ export class ProductListComponent {
 
   // Obtener fuente de imagen para vista previa
   getImageSource(): string {
-    if (this.product.image) {
-      return this.product.image;
+    if (this.product.imageUrl) {
+      return this.product.imageUrl;
     }
     return '';
   }
@@ -282,7 +383,7 @@ export class ProductListComponent {
 
   // Remover imagen seleccionada
   removeImage(): void {
-    this.product.image = '';
+    this.product.imageUrl = '';
     this.selectedFile = null;
     this.uploadError = '';
     

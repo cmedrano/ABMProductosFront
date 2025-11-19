@@ -12,8 +12,8 @@
         <label class="form-label fw-semibold">Categorías</label>
         <select class="form-select" [(ngModel)]="selectedCategory">
           <option value="">Todas las categorías</option>
-          <option *ngFor="let cat of categorys" [value]="cat.description">
-            {{ cat.description }}
+          <option *ngFor="let cat of categorys" [value]="cat.name">
+            {{ cat.name }}
           </option>
         </select>
       </div>
@@ -41,16 +41,16 @@
         <td>{{ p.name }}</td>
         <td>{{ p.description }}</td>
         <td>
-          <span *ngFor="let cat of p.category" class="badge text-dark fw-normal fs-6 py-2 px-3 me-3 d-inline-block">
-            {{ cat.description }}
+          <span *ngFor="let cat of p.categories" class="badge text-dark fw-normal fs-6 py-2 px-3 me-3 d-inline-block">
+            {{ cat.name }}
           </span>
-          <span *ngIf="p.category.length === 0" class="text-muted fst-italic">
+          <span *ngIf="p.categories.length === 0" class="text-muted fst-italic">
             Sin categorías
           </span>
         </td>
-        <td><img [src]="p.image" width="80" /></td>
+        <td><img [src]="p.imageUrl" width="80" /></td>
         <td style="margin: 10px">
-          <button class="btn btn-success btn-sm me-2" (click)="openEditModal(p.id)">
+          <button class="btn btn-success btn-sm me-2" (click)="openEditModal(p)">
             <i class="bi bi-pencil-square"></i>
           </button>
           <button class="btn btn-danger btn-sm ms-2" (click)="openDeleteModal(p.id)">
@@ -94,7 +94,7 @@
     <div class="modal-content">
       <div class="modal-header bg-primary text-white">
         <h5 class="modal-title">Agregar nuevo producto</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" (click)="closeModal()"></button>
       </div>
 
       <div class="modal-body">
@@ -114,9 +114,9 @@
 
             <!-- Contenedor de categorías seleccionadas -->
             <div class="selected-categories mb-2">
-              <span *ngFor="let cat of product.category; let i = index"
+              <span *ngFor="let cat of product.categories; let i = index"
                 class="badge bg-primary me-1 mb-1 d-inline-flex align-items-center">
-                {{ cat.description }}
+                {{ cat.name }}
                 <button type="button" class="btn-close btn-close-white ms-1" (click)="removeCategory(i)"
                   aria-label="Eliminar categoría"></button>
               </span>
@@ -128,7 +128,7 @@
                 (change)="addCategory(+categorySelect.value); categorySelect.value=''">
                 <option value="" selected disabled>Selecciona una categoría...</option>
                 <option *ngFor="let cat of availableCategories" [value]="cat.id">
-                  {{ cat.description }}
+                  {{ cat.name }}
                 </option>
               </select>
             </div>
@@ -140,7 +140,7 @@
             <!-- Vista previa de la imagen -->
             <div class="mb-3 text-center">
               <div class="image-preview-container border rounded p-3 bg-light"
-                *ngIf="!product.image && !selectedFile; else previewTemplate">
+                *ngIf="!product.imageUrl && !selectedFile; else previewTemplate">
                 <i class="bi bi-image fs-1 text-muted d-block mb-2"></i>
                 <span class="text-muted">Vista previa de la imagen</span>
               </div>
@@ -224,9 +224,9 @@
 
             <!-- Contenedor de categorías seleccionadas -->
             <div class="selected-categories mb-2">
-              <span *ngFor="let cat of selectedProduct.category; let i = index"
+              <span *ngFor="let cat of selectedProduct.categories; let i = index"
                 class="badge bg-success text-white me-1 mb-1 d-inline-flex align-items-center">
-                {{ cat.description }}
+                {{ cat.name }}
                 <button type="button" class="btn-close btn-close-dark ms-1" (click)="removeCategoryFromEdit(i)"
                   aria-label="Eliminar categoría"></button>
               </span>
@@ -238,7 +238,7 @@
                 (change)="addCategoryToEdit(+editCategorySelect.value); editCategorySelect.value=''">
                 <option value="" selected disabled>Selecciona una categoría...</option>
                 <option *ngFor="let cat of availableCategoriesForEdit" [value]="cat.id">
-                  {{ cat.description }}
+                  {{ cat.name }}
                 </option>
               </select>
             </div>
@@ -250,14 +250,14 @@
             <!-- Vista previa de la imagen -->
             <div class="mb-3 text-center">
               <div class="image-preview-container border rounded p-3 bg-light"
-                *ngIf="!selectedProduct.image; else editPreviewTemplate">
+                *ngIf="!selectedProduct.imageUrl; else editPreviewTemplate">
                 <i class="bi bi-image fs-1 text-muted d-block mb-2"></i>
                 <span class="text-muted">Vista previa de la imagen</span>
               </div>
 
               <ng-template #editPreviewTemplate>
                 <div class="position-relative d-inline-block">
-                  <img [src]="selectedProduct.image" alt="Vista previa" class="custom-preview-image">
+                  <img [src]="selectedProduct.imageUrl" alt="Vista previa" class="custom-preview-image">
                   <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1"
                     (click)="removeEditImage()">
                     <i class="bi bi-x-lg"></i>
