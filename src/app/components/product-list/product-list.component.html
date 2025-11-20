@@ -5,21 +5,31 @@
     <div class="row align-items-end">
       <div class="col-12 col-md-6 mb-3">
         <label class="form-label fw-semibold">Buscar</label>
-        <input type="text" class="form-control" placeholder="Producto..." [(ngModel)]="searchTerm" />
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Producto..."
+          [(ngModel)]="searchTerm"
+        />
       </div>
 
       <div class="col-12 col-md-4 mb-3">
         <label class="form-label fw-semibold">Categorías</label>
         <select class="form-select" [(ngModel)]="selectedCategory">
           <option value="">Todas las categorías</option>
-          <option *ngFor="let cat of categorys" [value]="cat.name">
+          <option *ngFor="let cat of categories" [value]="cat.name">
             {{ cat.name }}
           </option>
         </select>
       </div>
 
-      <div class="col-12 col-md-2 mb-3 d-flex align-items-end justify-content-md-end">
-        <button class="btn btn-primary w-100 w-md-auto" (click)="openAddModal()">
+      <div
+        class="col-12 col-md-2 mb-3 d-flex align-items-end justify-content-md-end"
+      >
+        <button
+          class="btn btn-primary w-100 w-md-auto"
+          (click)="openAddModal()"
+        >
           + Agregar
         </button>
       </div>
@@ -41,7 +51,10 @@
         <td>{{ p.name }}</td>
         <td>{{ p.description }}</td>
         <td>
-          <span *ngFor="let cat of p.categories" class="badge text-dark fw-normal fs-6 py-2 px-3 me-3 d-inline-block">
+          <span
+            *ngFor="let cat of p.categories"
+            class="badge text-dark fw-normal fs-6 py-2 px-3 me-3 d-inline-block"
+          >
             {{ cat.name }}
           </span>
           <span *ngIf="p.categories.length === 0" class="text-muted fst-italic">
@@ -50,10 +63,16 @@
         </td>
         <td><img [src]="p.imageUrl" width="80" /></td>
         <td style="margin: 10px">
-          <button class="btn btn-success btn-sm me-2" (click)="openEditModal(p)">
+          <button
+            class="btn btn-success btn-sm me-2"
+            (click)="openEditModal(p)"
+          >
             <i class="bi bi-pencil-square"></i>
           </button>
-          <button class="btn btn-danger btn-sm ms-2" (click)="openDeleteModal(p.id)">
+          <button
+            class="btn btn-danger btn-sm ms-2"
+            (click)="openDeleteModal(p.id)"
+          >
             <i class="bi bi-trash"></i>
           </button>
         </td>
@@ -63,14 +82,25 @@
 </div>
 
 <!-- Modal eliminar -->
-<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
+<div
+  class="modal fade"
+  id="confirmDeleteModal"
+  tabindex="-1"
+  aria-labelledby="confirmDeleteLabel"
+  aria-hidden="true"
+>
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header bg-danger text-white">
         <h5 class="modal-title" id="confirmDeleteLabel">
           Confirmar eliminación
         </h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+          aria-label="Cerrar"
+        ></button>
       </div>
       <div class="modal-body">
         ¿Seguro que deseas eliminar este producto? Esta acción no se puede
@@ -94,19 +124,36 @@
     <div class="modal-content">
       <div class="modal-header bg-primary text-white">
         <h5 class="modal-title">Agregar nuevo producto</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" (click)="closeModal()"></button>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+          (click)="closeModal()"
+        ></button>
       </div>
 
       <div class="modal-body">
         <form #addForm="ngForm">
           <div class="mb-3">
             <label class="form-label fw-semibold">Nombre</label>
-            <input type="text" class="form-control" [(ngModel)]="product.name" name="name" required />
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="product.name"
+              name="name"
+              required
+            />
           </div>
 
           <div class="mb-3">
             <label class="form-label fw-semibold">Descripción</label>
-            <textarea class="form-control" [(ngModel)]="product.description" name="description" rows="3"></textarea>
+            <textarea
+              class="form-control"
+              [(ngModel)]="product.description"
+              name="description"
+              rows="3"
+            ></textarea>
           </div>
 
           <div class="mb-3">
@@ -114,20 +161,37 @@
 
             <!-- Contenedor de categorías seleccionadas -->
             <div class="selected-categories mb-2">
-              <span *ngFor="let cat of product.categories; let i = index"
-                class="badge bg-primary me-1 mb-1 d-inline-flex align-items-center">
+              <span
+                *ngFor="let cat of product.categories; let i = index"
+                class="badge bg-primary me-1 mb-1 d-inline-flex align-items-center"
+              >
                 {{ cat.name }}
-                <button type="button" class="btn-close btn-close-white ms-1" (click)="removeCategory(i)"
-                  aria-label="Eliminar categoría"></button>
+                <button
+                  type="button"
+                  class="btn-close btn-close-white ms-1"
+                  (click)="removeCategory(i)"
+                  aria-label="Eliminar categoría"
+                ></button>
               </span>
             </div>
 
             <!-- Selector de categorías -->
             <div class="input-group">
-              <select class="form-select" #categorySelect
-                (change)="addCategory(+categorySelect.value); categorySelect.value=''">
-                <option value="" selected disabled>Selecciona una categoría...</option>
-                <option *ngFor="let cat of availableCategories" [value]="cat.id">
+              <select
+                class="form-select"
+                #categorySelect
+                (change)="
+                  addCategoryToProduct(+categorySelect.value);
+                  categorySelect.value = ''
+                "
+              >
+                <option value="" selected disabled>
+                  Selecciona una categoría...
+                </option>
+                <option
+                  *ngFor="let cat of availableCategories"
+                  [value]="cat.id"
+                >
                   {{ cat.name }}
                 </option>
               </select>
@@ -139,17 +203,26 @@
 
             <!-- Vista previa de la imagen -->
             <div class="mb-3 text-center">
-              <div class="image-preview-container border rounded p-3 bg-light"
-                *ngIf="!product.imageUrl && !selectedFile; else previewTemplate">
+              <div
+                class="image-preview-container border rounded p-3 bg-light"
+                *ngIf="!product.imageUrl && !selectedFile; else previewTemplate"
+              >
                 <i class="bi bi-image fs-1 text-muted d-block mb-2"></i>
                 <span class="text-muted">Vista previa de la imagen</span>
               </div>
 
               <ng-template #previewTemplate>
                 <div class="position-relative d-inline-block">
-                  <img [src]="getImageSource()" alt="Vista previa" class="custom-preview-image">
-                  <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1"
-                    (click)="removeImage()">
+                  <img
+                    [src]="getImageSource()"
+                    alt="Vista previa"
+                    class="custom-preview-image"
+                  />
+                  <button
+                    type="button"
+                    class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1"
+                    (click)="removeImage()"
+                  >
                     <i class="bi bi-x-lg"></i>
                   </button>
                 </div>
@@ -157,12 +230,22 @@
             </div>
 
             <!-- Input de archivo oculto -->
-            <input type="file" #fileInput class="d-none" (change)="onFileSelected($event)"
-              accept=".jpg,.jpeg,.png,.gif,.webp" multiple="false">
+            <input
+              type="file"
+              #fileInput
+              class="d-none"
+              (change)="onFileSelected($event)"
+              accept=".jpg,.jpeg,.png,.gif,.webp"
+              multiple="false"
+            />
 
             <!-- Botón para subir archivo -->
             <div class="d-grid gap-2">
-              <button type="button" class="btn btn-outline-primary" (click)="fileInput.click()">
+              <button
+                type="button"
+                class="btn btn-outline-primary"
+                (click)="fileInput.click()"
+              >
                 <i class="bi bi-cloud-upload me-2"></i>
                 Seleccionar Imagen
               </button>
@@ -177,7 +260,11 @@
             </div>
 
             <!-- Mensaje de error -->
-            <div *ngIf="uploadError" class="alert alert-danger mt-2 py-2" role="alert">
+            <div
+              *ngIf="uploadError"
+              class="alert alert-danger mt-2 py-2"
+              role="alert"
+            >
               <i class="bi bi-exclamation-triangle me-2"></i>
               {{ uploadError }}
             </div>
@@ -189,7 +276,11 @@
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
           Cancelar
         </button>
-        <button type="button" class="btn btn-primary" (click)="saveNewProduct()">
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="saveNewProduct()"
+        >
           Guardar
         </button>
       </div>
@@ -201,22 +292,37 @@
 <div class="modal fade" id="editProductModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
-      <div class="modal-header bg-success  text-white">
+      <div class="modal-header bg-success text-white">
         <h5 class="modal-title">Editar producto</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
       </div>
 
       <div class="modal-body">
         <form #editForm="ngForm">
           <div class="mb-3">
             <label class="form-label fw-semibold">Nombre</label>
-            <input type="text" class="form-control" [(ngModel)]="selectedProduct.name" name="editName" required />
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="selectedProduct.name"
+              name="editName"
+              required
+            />
           </div>
 
           <div class="mb-3">
             <label class="form-label fw-semibold">Descripción</label>
-            <textarea class="form-control" [(ngModel)]="selectedProduct.description" name="editDescription"
-              rows="3"></textarea>
+            <textarea
+              class="form-control"
+              [(ngModel)]="selectedProduct.description"
+              name="editDescription"
+              rows="3"
+            ></textarea>
           </div>
 
           <div class="mb-3">
@@ -224,20 +330,37 @@
 
             <!-- Contenedor de categorías seleccionadas -->
             <div class="selected-categories mb-2">
-              <span *ngFor="let cat of selectedProduct.categories; let i = index"
-                class="badge bg-success text-white me-1 mb-1 d-inline-flex align-items-center">
+              <span
+                *ngFor="let cat of selectedProduct.categories; let i = index"
+                class="badge bg-success text-white me-1 mb-1 d-inline-flex align-items-center"
+              >
                 {{ cat.name }}
-                <button type="button" class="btn-close btn-close-dark ms-1" (click)="removeCategoryFromEdit(i)"
-                  aria-label="Eliminar categoría"></button>
+                <button
+                  type="button"
+                  class="btn-close btn-close-dark ms-1"
+                  (click)="removeCategoryFromEdit(i)"
+                  aria-label="Eliminar categoría"
+                ></button>
               </span>
             </div>
 
             <!-- Selector de categorías -->
             <div class="input-group">
-              <select class="form-select" #editCategorySelect
-                (change)="addCategoryToEdit(+editCategorySelect.value); editCategorySelect.value=''">
-                <option value="" selected disabled>Selecciona una categoría...</option>
-                <option *ngFor="let cat of availableCategoriesForEdit" [value]="cat.id">
+              <select
+                class="form-select"
+                #editCategorySelect
+                (change)="
+                  addCategoryToEdit(+editCategorySelect.value);
+                  editCategorySelect.value = ''
+                "
+              >
+                <option value="" selected disabled>
+                  Selecciona una categoría...
+                </option>
+                <option
+                  *ngFor="let cat of availableCategoriesForEdit()"
+                  [value]="cat.id"
+                >
                   {{ cat.name }}
                 </option>
               </select>
@@ -249,17 +372,25 @@
 
             <!-- Vista previa de la imagen -->
             <div class="mb-3 text-center">
-              <div class="image-preview-container border rounded p-3 bg-light"
-                *ngIf="!selectedProduct.imageUrl; else editPreviewTemplate">
+              <div
+                class="image-preview-container border rounded p-3 bg-light"
+                *ngIf="!selectedProduct.imageUrl; else editPreviewTemplate"
+              >
                 <i class="bi bi-image fs-1 text-muted d-block mb-2"></i>
                 <span class="text-muted">Vista previa de la imagen</span>
               </div>
-
               <ng-template #editPreviewTemplate>
                 <div class="position-relative d-inline-block">
-                  <img [src]="selectedProduct.imageUrl" alt="Vista previa" class="custom-preview-image">
-                  <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1"
-                    (click)="removeEditImage()">
+                  <img
+                    [src]="selectedProduct.imageUrl"
+                    alt="Vista previa"
+                    class="custom-preview-image"
+                  />
+                  <button
+                    type="button"
+                    class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1"
+                    (click)="removeEditImage()"
+                  >
                     <i class="bi bi-x-lg"></i>
                   </button>
                 </div>
@@ -267,12 +398,22 @@
             </div>
 
             <!-- Input de archivo oculto -->
-            <input type="file" #fileInputEdit class="d-none" (change)="onEditFileSelected($event)"
-              accept=".jpg,.jpeg,.png,.gif,.webp" multiple="false">
+            <input
+              type="file"
+              #fileInputEdit
+              class="d-none"
+              (change)="onEditFileSelected($event)"
+              accept=".jpg,.jpeg,.png,.gif,.webp"
+              multiple="false"
+            />
 
             <!-- Botón para subir archivo -->
             <div class="d-grid gap-2">
-              <button type="button" class="btn btn-outline-success" (click)="fileInputEdit.click()">
+              <button
+                type="button"
+                class="btn btn-outline-success"
+                (click)="fileInputEdit.click()"
+              >
                 <i class="bi bi-cloud-upload me-2"></i>
                 Cambiar Imagen
               </button>
@@ -287,13 +428,15 @@
             </div>
 
             <!-- Mensaje de error  -->
-            <div *ngIf="uploadError" class="alert alert-danger mt-2 py-2" role="alert">
+            <div
+              *ngIf="uploadError"
+              class="alert alert-danger mt-2 py-2"
+              role="alert"
+            >
               <i class="bi bi-exclamation-triangle me-2"></i>
               {{ uploadError }}
             </div>
           </div>
-
-
         </form>
       </div>
 
